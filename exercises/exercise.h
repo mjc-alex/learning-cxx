@@ -2,7 +2,7 @@
 #define __EXERCISE_H__
 
 #include <iostream>
-
+#include <string.h>
 #define ASSERT(COND, MSG)                                                                         \
     if (!(COND)) {                                                                                \
         std::cerr << "\x1b[31mAssertion failed at line #" << __LINE__ << ": \x1b[0m" << std::endl \
