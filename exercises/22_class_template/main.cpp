@@ -10,8 +10,10 @@ struct Tensor4D {
     Tensor4D(unsigned int const shape_[4], T const *data_) {
         unsigned int size = 1;
         // TODO: 填入正确的 shape 并计算 size
+        size = shape_[0] * shape_[1] * shape_[2] * shape_[3];
         data = new T[size];
         std::memcpy(data, data_, size * sizeof(T));
+        std::memcpy(shape, shape_, 4 * sizeof(unsigned int));
     }
     ~Tensor4D() {
         delete[] data;
@@ -28,6 +30,35 @@ struct Tensor4D {
     // 则 `this` 与 `others` 相加时，3 个形状为 `[1, 2, 1, 4]` 的子张量各自与 `others` 对应项相加。
     Tensor4D &operator+=(Tensor4D const &others) {
         // TODO: 实现单向广播的加法
+        int part1 = this -> shape[0], block1 = this -> shape[1], row1 = this -> shape[2], col1 = this -> shape[3];
+        int part2 = others.shape[0], block2 = others.shape[1], row2 = others.shape[2], col2 = others.shape[3];
+        int p = 1, q = 1, r = 1; 
+        for (int i = 0; i < part1; i++) {
+            if (part1 != part2) {
+                part2 = 1;
+            }
+            for (int j = 0; j < block1; j++) {
+                if (block1 != block2) {
+                    block2 = 1;
+                    p = q = r = 0;
+                }
+                for (int k = 0; k < col1; k++) {
+                    if (col1 != col2) {
+                        col2 = 1;
+                        q = r = 0;
+                    }
+                    for (int l = 0; l < row1; l++) {
+                        if (row1 == row2) {
+                            r = 1;
+                        }
+                        int point1 = i * block1 * row1 * col1 + j * row1 * col1 + k + l * col1;
+                        int point2 = i * block2 * row2 * col2 + j * row2 * col2 * p + k * q + l * col2 * r;
+                        // std::cout << point2 << " ";
+                        this -> data[point1] += others.data[point2];
+                    }
+                }
+            }
+        }
         return *this;
     }
 };
